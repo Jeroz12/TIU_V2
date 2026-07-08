@@ -370,7 +370,7 @@
     return apellidoCompleto.split(" ").map(censurarPalabra).join(" ");
   }
 
-  document.getElementById("nombre-linea1").textContent = DATOS.nombre + procesarApellido(DATOS.apellido1);
+  document.getElementById("nombre-linea1").textContent = DATOS.nombre + " " +procesarApellido(DATOS.apellido1);
   document.getElementById("nombre-linea2").textContent = 
     procesarApellido(DATOS.apellido2);
 
