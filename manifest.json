@@ -1,6 +1,6 @@
 {
   "name": "TIU Virtual",
-  "short_name": "TIU",
+  "short_name": "MI UPC",
   "description": "Carnet virtual de estudiante",
   "start_url": "./",
   "display": "standalone",
