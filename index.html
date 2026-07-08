@@ -369,9 +369,9 @@
     return apellidoCompleto.split(" ").map(censurarPalabra).join(" ");
   }
 
-  document.getElementById("nombre-linea1").textContent = DATOS.nombre;
+  document.getElementById("nombre-linea1").textContent = DATOS.nombre + " " + procesarApellido(DATOS.apellido1);
   document.getElementById("nombre-linea2").textContent = 
-    procesarApellido(DATOS.apellido1) + " " + procesarApellido(DATOS.apellido2);
+    procesarApellido(DATOS.apellido2);
 
   document.getElementById("codigo").textContent  = DATOS.codigo;
   document.getElementById("banner").textContent  = DATOS.id_banner;
