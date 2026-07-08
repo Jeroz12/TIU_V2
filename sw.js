@@ -1,44 +1,46 @@
-const CACHE_NAME = "tiu-cache-v1";
+/* Service Worker - TIU Virtual
+   Cachea la app para que funcione offline y cargue al instante */
 
-// Archivos clave que se guardarán en el celular para funcionar sin internet
-const ASSETS_TO_CACHE = [
+const CACHE_NAME = "tiu-virtual-v1";
+const ASSETS = [
   "./",
   "./index.html",
   "./manifest.json"
 ];
 
-// Instalación: Guarda los archivos en caché
-self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(ASSETS_TO_CACHE))
+/* Instalación: guarda los archivos base en caché */
+self.addEventListener("install", (e) => {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
   self.skipWaiting();
 });
 
-// Activación: Limpia cachés antiguos si haces actualizaciones
-self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cache => {
-          if (cache !== CACHE_NAME) {
-            return caches.delete(cache);
-          }
-        })
-      );
-    })
+/* Activación: elimina cachés viejos de versiones anteriores */
+self.addEventListener("activate", (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+    )
   );
   self.clients.claim();
 });
 
-// Intercepta las peticiones: Muestra la versión caché si existe (Modo Offline)
-self.addEventListener("fetch", event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Devuelve el archivo guardado, o búscalo en internet si no está
-        return response || fetch(event.request);
-      })
+/* Fetch: responde desde caché primero; si no está, va a la red y guarda */
+self.addEventListener("fetch", (e) => {
+  e.respondWith(
+    caches.match(e.request).then((cached) => {
+      if (cached) return cached;
+      return fetch(e.request)
+        .then((resp) => {
+          // Cachear solo respuestas válidas del mismo origen o fuentes
+          if (resp && resp.status === 200 && e.request.method === "GET") {
+            const clone = resp.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
+          }
+          return resp;
+        })
+        .catch(() => cached); // Sin red y sin caché: falla silenciosamente
+    })
   );
 });
