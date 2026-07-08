@@ -7,10 +7,11 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="TIU Virtual" />
-  <link rel="manifest" href="manifest.json" />
+  
+  <link rel="manifest" href="manifest.json" charset="utf-8" />
+  
   <title>TIU Virtual</title>
 
-  <!-- Fuentes extraídas exactamente de index.html -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
@@ -351,31 +352,25 @@
 <div id="install-banner">📲 Agregar a pantalla de inicio</div>
 
 <script>
-  /*Estructura de datos idéntica a index.html: Solo 2 apellidos de base*/
   const DATOS = {
     nombre:    "RUBY ELENA",
     apellido1: "ALOCEN",
-    apellido2: "DE LA CRUZ", /* Segundo apellido compuesto */
+    apellido2: "DE LA CRUZ", 
     codigo:    "20221a994",
     id_banner: "N04317519",
     carrera:   "INGENIERIA INDUSTRIAL",
     campus:    "Campus San Miguel",
   };
 
-  /* Función de censura que procesa palabras individuales */
   function censurarPalabra(palabra) {
     return palabra.length <= 1 ? palabra : palabra[0] + "***";
   }
 
-  /* Función para procesar un apellido completo (si tiene espacios, censura cada parte) */
   function procesarApellido(apellidoCompleto) {
     return apellidoCompleto.split(" ").map(censurarPalabra).join(" ");
   }
 
-  /* Inyección de textos en el DOM */
   document.getElementById("nombre-linea1").textContent = DATOS.nombre;
-  
-  /* Renderizado de la línea 2: Une ambos apellidos procesando cualquier compuesto */
   document.getElementById("nombre-linea2").textContent = 
     procesarApellido(DATOS.apellido1) + " " + procesarApellido(DATOS.apellido2);
 
@@ -399,10 +394,13 @@
   tick();
   setInterval(tick, 1000);
 
+  // Manejo de la instalación nativa PWA en Chrome/Android
   let deferredPrompt;
   const banner = document.getElementById("install-banner");
   window.addEventListener("beforeinstallprompt", e => {
-    e.preventDefault(); deferredPrompt = e; banner.classList.add("show");
+    e.preventDefault(); 
+    deferredPrompt = e; 
+    banner.classList.add("show");
   });
   banner.addEventListener("click", async () => {
     if (!deferredPrompt) return;
@@ -413,7 +411,43 @@
   });
   window.addEventListener("appinstalled", () => banner.classList.remove("show"));
 
-  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+  // Registro automático del Service Worker original
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js")
+        .then(reg => console.log("SW registrado con éxito", reg.scope))
+        .catch(err => console.error("Error al registrar SW", err));
+    });
+  }
+
+  // DETECTOR ADICIONAL DE IPHONE: Si entra desde iOS y no está instalado, muestra instrucciones de Safari
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isStandalone = window.navigator.standalone === true;
+
+  if (isIOS && !isStandalone) {
+    const iosAlert = document.createElement('div');
+    iosAlert.style.position = 'fixed';
+    iosAlert.style.bottom = '20px';
+    iosAlert.style.left = '20px';
+    iosAlert.style.right = '20px';
+    iosAlert.style.background = '#1a1a2e';
+    iosAlert.style.color = '#fff';
+    iosAlert.style.padding = '16px';
+    iosAlert.style.borderRadius = '16px';
+    iosAlert.style.boxShadow = '0 8px 30px rgba(0,0,0,0.3)';
+    iosAlert.style.zIndex = '9999';
+    iosAlert.style.fontFamily = 'sans-serif';
+    iosAlert.style.fontSize = '14px';
+    iosAlert.style.textAlign = 'center';
+    
+    iosAlert.innerHTML = `
+      <p style="margin: 0 0 8px 0; font-weight: 600;">¡Instala TIU Virtual en tu iPhone!</p>
+      <p style="margin: 0; font-size: 13px; opacity: 0.9;">
+        Toca el botón <strong>Compartir</strong> <span style="font-size: 16px;">⎋</span> en Safari (abajo) y luego selecciona <strong>"Agregar al inicio"</strong>.
+      </p>
+    `;
+    document.body.appendChild(iosAlert);
+  }
 </script>
 </body>
 </html>
