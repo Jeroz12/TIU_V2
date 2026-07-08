@@ -96,7 +96,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      gap: 30px;               
+      gap: 19px;               
       padding-top: 22px;
       z-index: 1;
     }
@@ -369,7 +369,7 @@
     return apellidoCompleto.split(" ").map(censurarPalabra).join(" ");
   }
 
-  document.getElementById("nombre-linea1").textContent = DATOS.nombre + " " + procesarApellido(DATOS.apellido1);
+  document.getElementById("nombre-linea1").textContent = DATOS.nombre + procesarApellido(DATOS.apellido1);
   document.getElementById("nombre-linea2").textContent = 
     procesarApellido(DATOS.apellido2);
 
